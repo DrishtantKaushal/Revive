@@ -6,7 +6,8 @@
 
 <p align="center">
   Bring back Claude Code sessions that a Cursor crash took with it,<br>
-  into the folders, tabs and windows they came from.
+  into the folders, tabs and windows they came from.<br>
+  Bookmark the ones worth returning to.
 </p>
 
 <p align="center">
@@ -18,15 +19,40 @@
 </p>
 
 <p align="center">
-  <img src="docs/hero.png" alt="The Revive dashboard open beside a Claude Code terminal in Cursor, listing recoverable sessions by folder with their status">
+  <img src="docs/banner.png" alt="Revive: recover sessions lost to a Cursor crash, back into their own folders, tabs and windows">
 </p>
 
-When Cursor dies, every terminal it owned dies with it, and every `claude`
-session in those terminals goes too. The transcripts survive on disk, but
-nothing knows which sessions were lost rather than finished, or where they
-belong. `revive` records that as it happens and gives it back to you.
-
 > **macOS only.** See [Platform support](#platform-support) before you clone.
+
+## Why this exists
+
+I am an inveterate tab hoarder. Over a thousand Chrome tabs across thirty or
+more windows, permanently. There is a name for it, **digital hoarding**, and
+browsers have quietly designed around it for years. It is why Chrome offers to
+restore every window and every tab after it dies, rather than asking you to
+remember what you had open.
+
+The habit followed me into Cursor. Twenty or more terminals with Claude Code
+running at once, on days when the focused work needed five. Then Cursor runs out
+of memory and takes all of them with it. The transcripts survive on disk, but
+nothing knows which sessions were lost rather than finished, and nothing knows
+which directory each one was working in. Bringing back a handful meant guessing.
+Bringing back all of them was out of the question.
+
+I wanted Chrome's "restore windows", for Cursor.
+
+So I built Revive: a Claude Code skill that opens a React dashboard in Cursor's
+own browser pane and lists every session it knows about, crashed, terminated and
+gracefully exited alike. Pick the ones you want, or bulk select across a time
+range, and they come back in their own folders, tabs and windows. Sessions worth
+returning to later can be bookmarked so they stay at the top. It also brings
+back Claude Code sessions that were running in **Obsidian** terminals, which is
+the point where it stopped being a Cursor tool. Extending it across other IDEs
+and harnesses is the plan.
+
+<p align="center">
+  <img src="docs/dashboard.png" alt="The Revive dashboard open beside a Claude Code terminal in Cursor, listing recoverable sessions by folder with their status">
+</p>
 
 ## What it does
 
