@@ -1,0 +1,17 @@
+# Dependencies
+app/node_modules/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# Working notes, never product
+*.patch
+/*.html
+
+# Never commit a registry: it holds session records, workspace paths and,
+# in the IDE lock files it reads, per-window auth tokens.
+session-registry/

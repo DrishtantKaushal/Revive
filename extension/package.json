@@ -1,0 +1,24 @@
+{
+  "name": "revive-browser",
+  "displayName": "Revive Browser Opener",
+  "description": "Opens a local URL in Cursor's built-in Simple Browser via a cursor:// URI, so a CLI can put a page in an editor tab.",
+  "publisher": "local",
+  "version": "0.0.7",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished",
+    "onUri"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "contributes": {},
+  "__metadata": {
+    "installedTimestamp": 1788263030934,
+    "targetPlatform": "undefined",
+    "size": 4074
+  }
+}

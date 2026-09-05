@@ -1,0 +1,36 @@
+#!/bin/zsh
+# Default "integrated" profile for the Obsidian Terminal plugin.
+#
+# Transparent by design: when revive has nothing waiting, this is exactly the
+# login shell you had before, so your normal Obsidian terminal is unchanged.
+# When revive has queued a session for THIS vault, the first terminal to start
+# claims it and turns into that session.
+#
+# The vault root is passed in by the installer, because the plugin opens the
+# terminal with no arguments and the shell has no other way to know which vault
+# it belongs to.
+REVIVE_VAULT="${REVIVE_VAULT:-__VAULT__}"
+REVIVE_PY="${REVIVE_PY:-__PYTHON__}"
+REVIVE_CLI="${REVIVE_CLI:-__REVIVE__}"
+
+# Obsidian inherits the environment of whatever launched it. Launched from
+# inside a Claude Code session it carries CLAUDE_CODE_CHILD_SESSION=1, which
+# turns TRANSCRIPT SAVING OFF: the resumed session records nothing and could
+# never be revived again. It also carries a foreign CLAUDE_CODE_SESSION_ID and
+# Cursor's SSE port. Scrub unconditionally, because this shell cannot know how
+# Obsidian was started.
+unset CLAUDE_CODE_CHILD_SESSION CLAUDECODE CLAUDE_CODE_SESSION_ID       CLAUDE_CODE_BRIDGE_SESSION_ID CLAUDE_CODE_ENTRYPOINT CLAUDE_CODE_SSE_PORT       CLAUDE_CODE_MESSAGING_SOCKET CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_PID       CLAUDE_CODE_EXECPATH CLAUDE_CODE_DISABLE_TERMINAL_TITLE CLAUDE_EFFORT       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS       TERM_PROGRAM TERM_PROGRAM_VERSION VSCODE_NONCE VSCODE_GIT_ASKPASS_MAIN       VSCODE_GIT_ASKPASS_NODE VSCODE_GIT_ASKPASS_EXTRA_ARGS       VSCODE_GIT_IPC_HANDLE VSCODE_GIT_IPC_AUTH_TOKEN
+
+if [ -n "$REVIVE_VAULT" ] && [ -x "$REVIVE_PY" ]; then
+  if ticket=$("$REVIVE_PY" "$REVIVE_CLI" claim "$REVIVE_VAULT" 2>/dev/null); then
+    sid="${ticket%%	*}"
+    cwd="${ticket#*	}"
+    if [ -d "$cwd" ]; then
+      cd "$cwd" || exit 1
+      print -P "%F{cyan}revive%f resuming ${sid}"
+      exec claude --resume "$sid"
+    fi
+  fi
+fi
+
+exec /bin/zsh --login

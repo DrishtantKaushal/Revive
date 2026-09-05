@@ -1,0 +1,9 @@
+{
+  "id": "revive-bridge",
+  "name": "Revive Bridge",
+  "version": "0.1.0",
+  "minAppVersion": "1.4.11",
+  "description": "Reopens Claude Code sessions that revive queued for this vault, as terminals in Obsidian.",
+  "author": "revive",
+  "isDesktopOnly": true
+}
