@@ -1,7 +1,25 @@
-# revive
+<p align="center">
+  <img src="docs/logo.svg" width="76" height="76" alt="">
+</p>
 
-Bring back Claude Code sessions that a Cursor crash took with it, into the
-folders, tabs and windows they came from.
+<h1 align="center">Revive</h1>
+
+<p align="center">
+  Bring back Claude Code sessions that a Cursor crash took with it,<br>
+  into the folders, tabs and windows they came from.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/platform-macOS-1b1f2a" alt="macOS">
+  <img src="https://img.shields.io/badge/python-3.9%2B-1971c2" alt="Python 3.9+">
+  <img src="https://img.shields.io/badge/dependencies-none-2f9e44" alt="No dependencies">
+  <img src="https://img.shields.io/badge/tests-219-e8590c" alt="219 tests">
+  <img src="https://img.shields.io/badge/license-MIT-7048e8" alt="MIT">
+</p>
+
+<p align="center">
+  <img src="docs/hero.png" alt="The Revive dashboard open beside a Claude Code terminal in Cursor, listing recoverable sessions by folder with their status">
+</p>
 
 When Cursor dies, every terminal it owned dies with it, and every `claude`
 session in those terminals goes too. The transcripts survive on disk, but
@@ -27,6 +45,14 @@ $ revive.py list
 
 A dashboard does the same thing with checkboxes, grouped by folder and status,
 and restores a batch in one click.
+
+**Bookmark the sessions you care about.** Some work is worth keeping a handle
+on long after the crash that interrupted it. Starring a session pins it to the
+top of the list and keeps it there across filters, reloads, server restarts and
+your next reboot, so the thread you were pulling on is one click away instead of
+somewhere in eight hundred rows. Bookmarks live in the registry rather than in
+browser storage, because the dashboard opens on a fresh port every time and
+anything kept in the browser would not survive that.
 
 ## How it decides
 
@@ -128,6 +154,14 @@ the log, and both the log and the endpoint file are `0600`.
 Inside Cursor it opens as a tab beside your terminal through the companion
 extension. Elsewhere it opens in your browser. Force either with
 `revive.py open cursor` or `revive.py open browser`.
+
+What it holds on to for you:
+
+- **Bookmarks**, which sort to the top and survive everything
+- **Sort order**, by label or by when you last worked on a session
+- **Where each folder should reopen**, when a folder is not a Cursor project
+- **Selection**, which persists as you move between folders and statuses, so a
+  batch can be gathered across all of them before you restore it
 
 ## Tests
 
