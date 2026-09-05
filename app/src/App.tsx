@@ -447,68 +447,10 @@ export default function App() {
     )
   }
 
-  return (
-    <div
-      className={cn("mx-auto max-w-[1600px] px-6 pt-6",
-                    wide && "overflow-hidden pb-4")}
-      style={wide ? undefined : { paddingBottom: barH + 16 }}>
-      {/* Sessions recorded before the hooks existed have no host, so the tool
-          has to either ask or be told. This states which is in force rather
-          than silently assuming Cursor, which is the bug this replaces. */}
-      <header className="mb-1 flex flex-wrap items-baseline gap-3">
-        <h1 className="text-xl font-semibold tracking-tight">Revive</h1>
-        {/* The heading used to print sessions.length as "recoverable", but that
-            total includes running sessions, which can never be restored. It
-            therefore disagreed with the All-folders circle, which counts ticked
-            rows. State the two quantities separately instead. */}
-        {/* "recoverable" means restorable, not merely "not running": exited
-            sessions are listed but cannot be brought back. */}
-        <span className="text-sm text-muted-foreground">
-          {inRange.filter(s => !s.running &&
-            s.restorable).length} recoverable
-          {inRange.some(s => s.running) &&
-            `, ${inRange.filter(s => s.running).length} running`}
-          {inRange.some(s => s.badge === "Exited") &&
-            `, ${inRange.filter(s => s.badge === "Exited").length} exited`}
-        </span>
-      </header>
-
-      {(() => {
-        const unknown = data.sessions.filter(s => s.host_source === "unknown").length
-        if (!data.default_host && unknown === 0) return null
-        return (
-          <p className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1
-                        text-xs italic text-muted-foreground">
-            {data.default_host
-              ? <>All sessions with no recorded host open in
-                  <span className="inline-flex items-center gap-1.5 rounded-full
-                                   border px-2 py-0.5 not-italic font-mono
-                                   text-[11px] text-foreground">
-                    <span
-                      title={conn === "ok" ? "Connected to the dashboard server"
-                        : conn === "retrying" ? "Reconnecting…"
-                        : "Not connected. The list below is stale."}
-                      className={cn("h-1.5 w-1.5 rounded-full",
-                        conn === "ok" ? "revive-dot bg-emerald-500"
-                        : conn === "retrying" ? "revive-dot bg-amber-500"
-                        : "bg-red-500")}
-                    />
-                    {data.default_host}
-                  </span>
-</>
-              : <>{unknown} session{unknown === 1 ? "" : "s"} have no recorded host
-                  and will ask before restoring.</>}
-            <button className="not-italic underline underline-offset-2"
-                    onClick={() => setShowSettings(true)}>Change</button>
-          </p>
-        )
-      })()}
-
-        {/* The controls used to sit on the header row, which put them above the
-            host line. That line says which app sessions with no recorded host
-            will open in, and it is context for everything below it, so it now
-            reads straight after the counts and the controls follow it. */}
-        <div className="mt-3 flex flex-wrap items-center gap-1 sm:justify-end">
+  // One definition, two homes: on the title row when there is width for it,
+  // below the host line when the layout stacks.
+  const controls = (
+    <div className="flex flex-wrap items-center gap-1">
           <button
             onClick={reload}
             disabled={refreshing}
@@ -543,7 +485,73 @@ export default function App() {
               {t === "light" ? "Light" : "Night"}
             </button>
           ))}
-        </div>
+    </div>
+  )
+
+  return (
+    <div
+      className={cn("mx-auto max-w-[1600px] px-6 pt-6",
+                    wide && "overflow-hidden pb-4")}
+      style={wide ? undefined : { paddingBottom: barH + 16 }}>
+      {/* Sessions recorded before the hooks existed have no host, so the tool
+          has to either ask or be told. This states which is in force rather
+          than silently assuming Cursor, which is the bug this replaces. */}
+      <header className="mb-1 flex flex-wrap items-baseline gap-3">
+        <h1 className="text-xl font-semibold tracking-tight">Revive</h1>
+        {/* The heading used to print sessions.length as "recoverable", but that
+            total includes running sessions, which can never be restored. It
+            therefore disagreed with the All-folders circle, which counts ticked
+            rows. State the two quantities separately instead. */}
+        {/* "recoverable" means restorable, not merely "not running": exited
+            sessions are listed but cannot be brought back. */}
+        <span className="text-sm text-muted-foreground">
+          {inRange.filter(s => !s.running &&
+            s.restorable).length} recoverable
+          {inRange.some(s => s.running) &&
+            `, ${inRange.filter(s => s.running).length} running`}
+          {inRange.some(s => s.badge === "Exited") &&
+            `, ${inRange.filter(s => s.badge === "Exited").length} exited`}
+        </span>
+          {wide && <div className="ml-auto">{controls}</div>}
+      </header>
+
+      {(() => {
+        const unknown = data.sessions.filter(s => s.host_source === "unknown").length
+        if (!data.default_host && unknown === 0) return null
+        return (
+          <p className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1
+                        text-xs italic text-muted-foreground">
+            {data.default_host
+              ? <>All sessions with no recorded host open in
+                  <span className="inline-flex items-center gap-1.5 rounded-full
+                                   border px-2 py-0.5 not-italic font-mono
+                                   text-[11px] text-foreground">
+                    <span
+                      title={conn === "ok" ? "Connected to the dashboard server"
+                        : conn === "retrying" ? "Reconnecting…"
+                        : "Not connected. The list below is stale."}
+                      className={cn("h-1.5 w-1.5 rounded-full",
+                        conn === "ok" ? "revive-dot bg-emerald-500"
+                        : conn === "retrying" ? "revive-dot bg-amber-500"
+                        : "bg-red-500")}
+                    />
+                    {data.default_host}
+                  </span>
+</>
+              : <>{unknown} session{unknown === 1 ? "" : "s"} have no recorded host
+                  and will ask before restoring.</>}
+            <button className="not-italic underline underline-offset-2"
+                    onClick={() => setShowSettings(true)}>Change</button>
+          </p>
+        )
+      })()}
+
+        {/* Stacked, there is no room beside the title, so the controls drop
+            below the host line rather than wrapping into a ragged second row.
+            Side by side they belong on the title row, where they have always
+            been. */}
+        {!wide && <div className="mt-3">{controls}</div>}
+
 
       {offline && (
         <p className="mt-3 rounded-md border border-destructive/40 px-3 py-2
