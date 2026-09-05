@@ -62,3 +62,10 @@
   50%      { opacity: 0.25; }
 }
 .revive-dot { animation: revive-pulse 1.6s ease-in-out infinite; }
+
+/* The status and date chips scroll sideways on a narrow screen rather than
+   wrapping into six rows and pushing the cards off the bottom. Chips must not
+   squash, and the scrollbar itself would cost another row of height. */
+.revive-chips > * { flex: 0 0 auto; }
+.revive-chips { scrollbar-width: none; }
+.revive-chips::-webkit-scrollbar { display: none; }

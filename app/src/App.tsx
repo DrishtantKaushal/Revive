@@ -203,10 +203,12 @@ export default function App() {
   const panesRef = useRef<HTMLDivElement | null>(null)
   const barRef = useRef<HTMLDivElement | null>(null)
   const [paneH, setPaneH] = useState<number | null>(null)
+  const [barH, setBarH] = useState(56)
   useEffect(() => {
     const measure = () => {
       const top = panesRef.current?.getBoundingClientRect().top ?? 0
       const bar = barRef.current?.offsetHeight ?? 56
+      setBarH(bar)
       setPaneH(Math.max(240, window.innerHeight - top - bar - 16))
     }
     measure()
@@ -446,7 +448,10 @@ export default function App() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] overflow-hidden px-6 pb-4 pt-6">
+    <div
+      className={cn("mx-auto max-w-[1600px] px-6 pt-6",
+                    wide && "overflow-hidden pb-4")}
+      style={wide ? undefined : { paddingBottom: barH + 16 }}>
       {/* Sessions recorded before the hooks existed have no host, so the tool
           has to either ask or be told. This states which is in force rather
           than silently assuming Cursor, which is the bug this replaces. */}
@@ -466,7 +471,44 @@ export default function App() {
           {inRange.some(s => s.badge === "Exited") &&
             `, ${inRange.filter(s => s.badge === "Exited").length} exited`}
         </span>
-        <div className="ml-auto flex items-center gap-1">
+      </header>
+
+      {(() => {
+        const unknown = data.sessions.filter(s => s.host_source === "unknown").length
+        if (!data.default_host && unknown === 0) return null
+        return (
+          <p className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1
+                        text-xs italic text-muted-foreground">
+            {data.default_host
+              ? <>All sessions with no recorded host open in
+                  <span className="inline-flex items-center gap-1.5 rounded-full
+                                   border px-2 py-0.5 not-italic font-mono
+                                   text-[11px] text-foreground">
+                    <span
+                      title={conn === "ok" ? "Connected to the dashboard server"
+                        : conn === "retrying" ? "Reconnecting…"
+                        : "Not connected. The list below is stale."}
+                      className={cn("h-1.5 w-1.5 rounded-full",
+                        conn === "ok" ? "revive-dot bg-emerald-500"
+                        : conn === "retrying" ? "revive-dot bg-amber-500"
+                        : "bg-red-500")}
+                    />
+                    {data.default_host}
+                  </span>
+</>
+              : <>{unknown} session{unknown === 1 ? "" : "s"} have no recorded host
+                  and will ask before restoring.</>}
+            <button className="not-italic underline underline-offset-2"
+                    onClick={() => setShowSettings(true)}>Change</button>
+          </p>
+        )
+      })()}
+
+        {/* The controls used to sit on the header row, which put them above the
+            host line. That line says which app sessions with no recorded host
+            will open in, and it is context for everything below it, so it now
+            reads straight after the counts and the controls follow it. */}
+        <div className="mt-3 flex flex-wrap items-center gap-1 sm:justify-end">
           <button
             onClick={reload}
             disabled={refreshing}
@@ -502,38 +544,6 @@ export default function App() {
             </button>
           ))}
         </div>
-      </header>
-
-      {(() => {
-        const unknown = data.sessions.filter(s => s.host_source === "unknown").length
-        if (!data.default_host && unknown === 0) return null
-        return (
-          <p className="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-1
-                        text-xs italic text-muted-foreground">
-            {data.default_host
-              ? <>All sessions with no recorded host open in
-                  <span className="inline-flex items-center gap-1.5 rounded-full
-                                   border px-2 py-0.5 not-italic font-mono
-                                   text-[11px] text-foreground">
-                    <span
-                      title={conn === "ok" ? "Connected to the dashboard server"
-                        : conn === "retrying" ? "Reconnecting…"
-                        : "Not connected. The list below is stale."}
-                      className={cn("h-1.5 w-1.5 rounded-full",
-                        conn === "ok" ? "revive-dot bg-emerald-500"
-                        : conn === "retrying" ? "revive-dot bg-amber-500"
-                        : "bg-red-500")}
-                    />
-                    {data.default_host}
-                  </span>
-</>
-              : <>{unknown} session{unknown === 1 ? "" : "s"} have no recorded host
-                  and will ask before restoring.</>}
-            <button className="not-italic underline underline-offset-2"
-                    onClick={() => setShowSettings(true)}>Change</button>
-          </p>
-        )
-      })()}
 
       {offline && (
         <p className="mt-3 rounded-md border border-destructive/40 px-3 py-2
@@ -699,7 +709,8 @@ export default function App() {
           </div>
           {/* Status filter. Nothing is hidden any more: sessions you exited on
               purpose are listed too, just filtered out of the default view. */}
-          <div className="mb-5 flex flex-wrap gap-2">
+          <div className="revive-chips mb-5 flex gap-2 max-sm:flex-nowrap
+                          max-sm:overflow-x-auto max-sm:pb-1 sm:flex-wrap">
             {[["All", inRange.length] as [string, number],
               ["Bookmarked", inRange.filter(s => s.bookmarked).length] as [string, number],
               ...data.statusOrder
@@ -724,7 +735,9 @@ export default function App() {
                 )
               })}
           </div>
-          <div className="mb-5 flex flex-wrap items-center gap-2">
+          <div className="revive-chips mb-5 flex items-center gap-2
+                          max-sm:flex-nowrap max-sm:overflow-x-auto max-sm:pb-1
+                          sm:flex-wrap">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               Last
             </span>
@@ -769,14 +782,25 @@ export default function App() {
               under it. Letting the PAGE scroll on narrow screens was wrong: it
               carried the rail off the top, so choosing a folder meant scrolling
               back up, which is the thing this exists to prevent. */}
+          {/* Narrow screens let the PAGE scroll. Clipping it, and giving this
+              container a measured height, is what starved the card list: with
+              the filters stacked the header ate most of the viewport, the
+              measurement bottomed out at its 240px floor, and the folder rail
+              then took all of that, leaving the cards nothing. */}
           <div ref={panesRef}
-               style={paneH ? { height: paneH } : undefined}
+               style={wide && paneH ? { height: paneH } : undefined}
                className={cn("gap-6",
                  wide ? "grid grid-cols-1 items-start md:grid-cols-[210px_1fr]"
                       : "flex flex-col")}>
+            {/* Narrow: the rail STICKS to the top of the viewport, so it stays
+                on screen while the cards scroll under it, which is the freeze
+                pane behaviour asked for. Capping it inside a fixed-height pane
+                is what let it swallow the pane whole. */}
             <nav
               style={wide && paneH ? { maxHeight: paneH } : undefined}
-             className={cn("overflow-y-auto pr-1", !wide && "max-h-[32vh] shrink-0")}>
+              className={cn("overflow-y-auto pr-1",
+                !wide && "sticky top-0 z-20 max-h-[30vh] shrink-0 border-b " +
+                         "border-border bg-background pb-2")}>
               <h2 className="sticky top-0 z-10 mb-2 bg-background pb-1 text-[11px]
                              font-semibold uppercase tracking-wider text-muted-foreground">
                 Folders
@@ -794,11 +818,12 @@ export default function App() {
                 truncate everything. */}
             <div
               style={wide && paneH ? { maxHeight: paneH } : undefined}
-              className={cn("grid grid-cols-1 gap-3 overflow-y-auto pr-1",
+              className={cn("grid grid-cols-1 gap-3 pr-1",
                             "lg:grid-cols-2 2xl:grid-cols-3",
-                            // min-h-0 or the grid will not shrink inside the
-                            // flex column and the scroll never engages
-                            !wide && "min-h-0 flex-1")}>
+                            // Wide: its own scroller beside the rail. Narrow:
+                            // no scroller of its own, it rides the page scroll
+                            // beneath the stuck rail and can never be squeezed.
+                            wide ? "overflow-y-auto" : "pt-3")}>
               {visible.map(s => {
                 const on = picked.has(s.id)
                 return (
